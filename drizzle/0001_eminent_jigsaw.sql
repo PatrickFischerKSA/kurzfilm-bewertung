@@ -1,0 +1,1 @@
+CREATE INDEX `idx_films_room_created` ON `films` (`room_id`,`created_at`);

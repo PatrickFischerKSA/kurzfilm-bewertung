@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+const base=process.argv[2];
+if(!base||!/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(base))throw Error('Use local preview URL only.');
+async function call(token,body){const r=await fetch(base+'/api/rooms',{method:body?'POST':'GET',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:body?JSON.stringify(body):undefined});return {status:r.status,body:await r.json()};}
+const first=await call('',{action:'create',name:'Integrationstest'});assert.equal(first.status,201);const token=first.body.token;
+const second=await call('',{action:'create',name:'Anderer Raum'});const token2=second.body.token;
+assert.equal((await call('')).status,401);
+assert.equal((await call(token.slice(0,-1)+'z')).status,401);
+const film=crypto.randomUUID();assert.equal((await call(token,{action:'film',id:film,title:'Testfilm'})).status,200);
+assert.equal((await call(token,{action:'film',id:film,title:'Testfilm'})).status,200,'Idempotent film creation');
+const set=(t,key,value,version=0)=>call(t,{action:'field',film,key,value,version});
+assert.equal((await set(token2,'de.score.0',4)).status,404,'Cross-room write must fail');
+assert.equal((await set(token,'de.score.0',5)).status,400);
+assert.equal((await set(token,'de.score.0',1.5)).status,400);
+assert.equal((await set(token,'unknown','x')).status,400);
+const results=await Promise.all([set(token,'de.score.0',4),set(token,'ko.score.0',3)]);assert.deepEqual(results.map(x=>x.status),[200,200]);
+const race=await Promise.all([set(token,'de.score.0',1,1),set(token,'de.score.0',2,1)]);assert.deepEqual(race.map(x=>x.status).sort(),[200,409]);
+const state=await call(token);assert.equal(state.body.films.length,1);assert.equal(state.body.fields.find(f=>f.key==='de.score.0').version,2);
+assert.equal(state.body.fields.find(f=>f.key==='ko.score.0').value,3);
+assert.equal((await call(token2)).body.films.length,0);
+assert.equal((await set(token,'de.score.0',null,2)).status,200);
+assert.equal((await set(token,'storyboard','missing')).status,200);
+assert.equal((await call(token,{action:'field',film:'room',key:'rounding',value:'0.5',version:0})).status,200);
+assert.equal((await call(token,{action:'field',film:'room',key:'rounding',value:'0.2',version:1})).status,400);
+console.log('PASS: room isolation, authorization, validation, idempotency, parallel subject saves, same-field conflict, reset and settings.');

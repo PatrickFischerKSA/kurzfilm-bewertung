@@ -1,0 +1,4 @@
+import { sqliteTable, text, integer, primaryKey, index } from 'drizzle-orm/sqlite-core';
+export const rooms = sqliteTable('rooms', { id:text('id').primaryKey(), secretHash:text('secret_hash').notNull(), name:text('name').notNull(), createdAt:text('created_at').notNull() });
+export const films = sqliteTable('films', { id:text('id').primaryKey(), roomId:text('room_id').notNull().references(()=>rooms.id), createdAt:text('created_at').notNull() }, t=>[index('idx_films_room_created').on(t.roomId,t.createdAt)]);
+export const fields = sqliteTable('fields', { roomId:text('room_id').notNull().references(()=>rooms.id), filmId:text('film_id').notNull(), key:text('key').notNull(), value:text('value').notNull(), version:integer('version').notNull().default(1), updatedAt:text('updated_at').notNull() }, t=>[primaryKey({columns:[t.roomId,t.filmId,t.key]})]);
