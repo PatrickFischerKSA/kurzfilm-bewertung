@@ -1,8 +1,8 @@
 {
   "de": [
     {
-      "title": "Auseinandersetzung mit «Heimat»",
-      "description": "Der Film entwickelt einen erkennbaren Gedanken oder eine Frage zu Heimat. Das Thema wird an konkreten Situationen gezeigt. Die Auseinandersetzung zeigt gedankliche Tiefe und geht über schöne Bilder hinaus.",
+      "title": "Auseinandersetzung mit dem Thema «Heimat»",
+      "description": "Der Film entwickelt einen erkennbaren Gedanken oder eine Frage zum Thema «Heimat». Das Thema wird an konkreten Situationen gezeigt, geht über schöne Bilder hinaus und verfügt über gedankliche Tiefe.",
       "weight": 1
     },
     {
@@ -11,23 +11,23 @@
       "weight": 2
     },
     {
-      "title": "Figuren und ihr Bezug zu Heimat",
-      "description": "Es wird klar, welche Person oder welche Personen im Mittelpunkt stehen und was Heimat für sie bedeutet. Das Publikum erkennt, was die Figuren möchten, was ihnen fehlt oder was sie beschäftigt. Ihre Handlungen und Reaktionen passen dazu.",
+      "title": "Figuren",
+      "description": "Es wird klar, welche Figur oder welche Figuren im Mittelpunkt stehen und was Heimat für sie bedeutet. Das Publikum erkennt, was die Figuren möchten, was ihnen fehlt oder was sie beschäftigt. Ihre Handlungen und Reaktionen passen dazu.",
       "weight": 1
     },
     {
-      "title": "Sprachliche und erzählerische Präzision",
-      "description": "Dialoge, Off-Texte und Einblendungen sind treffend, verständlich und der Situation angemessen. Sie tragen zur Aussage bei und erklären nicht unnötig, was bereits sichtbar ist. Schriftliche Texte sind sprachlich korrekt. Bei einem Film ohne gesprochene Sprache übernehmen präzise gestaltete Situationen, Gesten und Bildmotive diese erzählerische Aufgabe.",
+      "title": "Sprachliche Korrektheit und erzählerische Gestaltung",
+      "description": "Dialoge, Off-Texte und Einblendungen sind treffend, verständlich und der Situation angemessen. Sie tragen zur Aussage bei und erklären nicht unnötig, was bereits sichtbar ist. Texte sind sprachlich korrekt.",
       "weight": 1
     },
     {
-      "title": "Eigenständigkeit der Gestaltung",
+      "title": "Eigenständigkeit / Originalität",
       "description": "Der Film zeigt eine eigene Idee und einen erkennbaren gestalterischen Zugriff auf das Thema. Details, Motive oder überraschende Verbindungen sind sinnvoll eingesetzt. Originalität entsteht durch die eigene Sichtweise; eine spektakuläre Geschichte ist nicht erforderlich.",
       "weight": 1
     },
     {
-      "title": "Storyboard und Erzählplanung",
-      "description": "Das Storyboard hält die vollständige Szenenfolge, wichtige Handlungen sowie vorgesehene Dialoge, Off-Texte und Einblendungen fest. Der Verlauf der Geschichte lässt sich daraus verstehen. Texte dürfen auf einem zugeordneten Zusatzblatt stehen. Wesentliche Änderungen zum fertigen Film sind kurz und schlüssig begründet.",
+      "title": "Storyboard",
+      "description": "Das Storyboard hält die vollständige Szenenfolge, wichtige Handlungen sowie vorgesehene Dialoge, Off-Texte und Einblendungen fest. Der Verlauf der Geschichte lässt sich daraus verstehen. Wesentliche Änderungen zum fertigen Film sind kurz und schlüssig begründet.",
       "weight": 1
     }
   ],
@@ -73,7 +73,7 @@
   "guidance": [
     "Bewertungsgrundlage: Der fertige Film und das verbindlich abzugebende Storyboard. Die Kriterien 1–5 bewerten den Film, Kriterium 6 bewertet das Storyboard. Pro Fach sind 24 Punkte für den Film und 4 Punkte für das Storyboard möglich.",
     "Storyboard: Vor dem Dreh erstellen und als Arbeitsgrundlage nutzen. Pro Einstellung sind eine nummerierte Skizze, Handlung, Texte sowie Kamera- und Tonangaben nötig. Strichzeichnungen genügen. Änderungen werden kurz erläutert; die ursprüngliche Planung bleibt erkennbar. Fehlt das Storyboard, gibt es in beiden Fächern bei Kriterium 6 jeweils 0 Punkte.",
-    "Dauer: 3–4 Minuten; vorab festlegen, ob der Abspann mitzählt. Eine deutliche Abweichung wird ausschliesslich bei Deutsch, Kriterium 2, berücksichtigt.",
+    "Dauer: 4–5 Minuten.",
     "Keine Doppelabzüge: Ein unverständlicher Dialog wegen schlechter Aufnahme betrifft den Ton; ein inhaltlich unklarer Dialog die sprachliche Gestaltung.",
     "Altersgerechter Massstab: Erwartet wird ein sorgfältiger Schüler*innenfilm mit den vorhandenen Mitteln. Inhalt und sinnvolle Gestaltung zählen stärker als technische Perfektion oder teure Ausstattung.",
     "Heimat bleibt offen: Bewertet wird die Qualität der Auseinandersetzung. Persönliche oder familiäre Erfahrungen müssen nicht offengelegt werden.",

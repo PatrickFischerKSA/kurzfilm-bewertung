@@ -2,7 +2,7 @@
 
 **Anwendung öffnen:** https://patrickfischerksa.github.io/kurzfilm-bewertung/
 
-Kollaboratives Bewertungstool für zwei Lehrpersonen in Deutsch und Kommunikation. Die Oberfläche wird von **GitHub Pages** ausgeliefert. Der gemeinsam genutzte Speicher läuft als eigener Cloudflare Worker mit eigener D1-Datenbank im Konto des Projektinhabers. **Die Anwendung benötigt kein ChatGPT-Sites-Projekt. Das frühere Sites-Projekt kann gelöscht werden.**
+Kollaboratives Bewertungstool für zwei Lehrpersonen in Deutsch und Kommunikation. Die Oberfläche wird von **GitHub Pages** ausgeliefert. Der gemeinsam genutzte Speicher läuft als eigener Cloudflare Worker mit eigener D1-Datenbank im Konto des Projektinhabers. **Die Anwendung benötigt kein ChatGPT-Sites-Projekt. Das frühere Sites-Projekt wurde gelöscht.**
 
 ## Verwendung
 
@@ -16,7 +16,7 @@ Beide Lehrpersonen können alle Eingaben lesen und bearbeiten. Die Fachreiter si
 
 ## Bewertung
 
-Grundlage ist `Bewertungsraster_Kurzfilm_definitiv.docx`, mit den gewünschten Anpassungen „gedankliche Tiefe“ und einfacher Gewichtung des ersten Kriteriums in beiden Fächern.
+Grundlage ist `Bewertungsraster_Kurzfilm 1.docx`. Kriterien und Beschreibungen entsprechen diesem Raster; die vorgesehene Filmlänge beträgt 4–5 Minuten.
 
 - Je Fach sechs Kriterien mit Gewichten **1, 2, 1, 1, 1, 1**; maximal **28 Punkte**.
 - Kriterien 1–5: Film, maximal 24 Punkte. Kriterium 6: Storyboard, maximal 4 Punkte.
