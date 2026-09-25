@@ -10,13 +10,24 @@ const moduleResult={exports:{}};vm.runInNewContext(code,{exports:moduleResult.ex
 const {summary,validField}=moduleResult.exports;
 assert.equal(summary(()=>null,'de').grade,null);
 assert.equal(summary(k=>k.includes('.score.')?0:null,'de').grade,1);
-assert.equal(summary(k=>k.includes('.score.')?4:null,'de').total,32);
+assert.equal(summary(k=>k.includes('.score.')?4:null,'de').total,28);
 assert.equal(summary(k=>k.includes('.score.')?4:null,'de').grade,6);
-assert.equal(summary(k=>k==='storyboard'?'missing':k.includes('.score.')?4:null,'de').total,28);
+assert.equal(summary(k=>k==='storyboard'?'missing':k.includes('.score.')?4:null,'de').total,24);
 assert.equal(summary(k=>k==='storyboard'?'missing':null,'ko').count,1);
-assert.equal(summary(k=>k==='de.score.0'?4:null,'de').total,8);
+assert.equal(summary(k=>k==='de.score.0'?4:null,'de').total,4);
 assert.equal(summary(k=>k.includes('.score.')?3:null,'ko','0.5').grade,5);
 assert.equal(summary(k=>k.includes('.score.')?3:null,'ko','0').grade,4.75);
 assert.equal(validField('room','rounding','0.2'),false);
 assert.equal(validField('film','de.score.0',NaN),false);
 console.log('PASS: weighted scoring, 0 versus unassessed, missing storyboard, two rounding modes, validation.');
+
+for(const subject of ['de','ko']) {
+ const firstOnly=k=>k===`${subject}.score.0`?4:k.includes('.score.')?0:null;
+ assert.equal(summary(firstOnly,subject).total,4);
+ assert.equal(summary(firstOnly,subject).grade.toFixed(1),'1.7');
+ assert.equal(summary(k=>k===`${subject}.score.1`?4:null,subject).total,8);
+ assert.equal(summary(k=>k.includes('.score.')?4:null,subject).total,28);
+ assert.equal(summary(k=>k.includes('.score.')?4:null,subject).grade,6);
+ assert.equal(summary(k=>k==='storyboard'?'missing':k.includes('.score.')?4:null,subject).total,24);
+}
+console.log('PASS: both subjects use weights 1,2,1,1,1,1 and a 28-point denominator.');

@@ -16,13 +16,15 @@ Beide Lehrpersonen können alle Eingaben sehen und bearbeiten. Die Fachreiter tr
 
 ## Bewertung
 
-- Je Fach sechs Kriterien mit den Gewichten 2, 2, 1, 1, 1, 1; maximal 32 Punkte.
-- Kriterien 1–5: Film, maximal 28 Punkte. Kriterium 6: Storyboard, maximal 4 Punkte.
+- Je Fach sechs Kriterien mit den Gewichten 1, 2, 1, 1, 1, 1; maximal 28 Punkte.
+- Kriterien 1–5: Film, maximal 24 Punkte. Kriterium 6: Storyboard, maximal 4 Punkte.
 - Bewertung je Kriterium 0–4. Noch offene Kriterien zählen nicht als Nullbewertung; eine Fachnote wird erst bei sechs bewerteten Kriterien angezeigt.
 - Fehlendes Storyboard erzwingt in beiden Fächern für Kriterium 6 null Punkte. Eine zuvor erfasste Storyboard-Bewertung bleibt intern erhalten, wird aber erst wieder berücksichtigt, wenn der Status auf „Vorhanden“ gesetzt wird.
-- Vorgeschlagene Formel der Vorlage: `1 + 5 × Punkte / 32`. Einstellbar: Zehntelnoten (Voreinstellung des Tools), halbe Noten oder ungerundet (Anzeige mit vier Dezimalstellen).
+- Formel mit angepasster Gewichtung: `1 + 5 × Punkte / 28`. Einstellbar: Zehntelnoten (Voreinstellung des Tools), halbe Noten oder ungerundet (Anzeige mit vier Dezimalstellen).
 - Die Vorlage ergibt zwei Gruppennoten. Kein Gesamtmittel und keine automatischen individuellen Abzüge.
 - Laufzeitabweichungen werden nur angezeigt, nicht automatisch abgezogen.
+
+Bestehende Bewertungen werden mit der neuen Gewichtung neu berechnet; die vergebenen Stufen von 0–4 und Kommentare bleiben erhalten.
 
 ## Speicherung und Zugang
 

@@ -9,7 +9,8 @@ export function summary(get:(key:string)=>Field['value'],subject:Subject,roundin
  const scores=rubric[subject].map((_,i)=> i===5&&missing?0:get(`${subject}.score.${i}`));
  const count=scores.filter(v=>typeof v==='number').length;
  const total=scores.reduce<number>((n,v,i)=>n+(typeof v==='number'?v:0)*rubric[subject][i].weight,0);
- const raw=1+5*total/32;
+ const maximum=rubric[subject].reduce((n,c)=>n+4*c.weight,0);
+ const raw=1+5*total/maximum;
  const step=Number(rounding);
  return {scores,count,total,raw,grade:count===6?(step?Math.round((raw+Number.EPSILON)/step)*step:raw):null};
 }
