@@ -44,7 +44,7 @@ Namen, Bewertungen, Raumlinks und Zugangsschlüssel liegen **nicht im GitHub-Rep
 Node.js >= 22.13:
 
 ```sh
-npm ci
+npm install
 npm run check
 npm test
 npm run build
@@ -73,7 +73,7 @@ API-Tests erzeugen ausschliesslich Testdaten in der angegebenen lokalen Vorschau
 
 ## Veröffentlichung
 
-Die Datei `.github/workflows/pages.yml` prüft und baut die Oberfläche und veröffentlicht sie automatisch auf GitHub Pages. Dafür werden keine Cloudflare-Zugangsdaten benötigt.
+Die fertige Oberfläche wird im Ordner `docs/` zusammen mit dem Quellcode versioniert. GitHub Actions veröffentlicht genau diesen geprüften Stand; auf dem Veröffentlichungsserver ist keine Paketinstallation nötig. Vor Änderungen `npm run check`, `npm test` und `npm run build` ausführen und den aktualisierten Ordner `docs/` mit committen. Dafür werden keine Cloudflare-Zugangsdaten benötigt.
 
 API-Änderungen separat bereitstellen:
 
@@ -99,6 +99,7 @@ Am 25. September 2026 wurden die drei Tabellen `rooms`, `films` und `fields` der
 
 - `app/page.tsx`, `app/globals.css`: Oberfläche, Zusammenarbeit, Druck und Export
 - `main.tsx`, `index.html`, `vite.config.ts`: eigenständige GitHub-Pages-Anwendung
+- `docs/`: fertig gebaute und direkt auf GitHub veröffentlichte Oberfläche
 - `lib/rubric.json`, `lib/model.ts`: Raster und Notenberechnung
 - `lib/deployment.ts`: öffentliche API-Adresse und korrekte Raumlinks
 - `server/`: Cloudflare-API mit CORS und versionsgesicherten Änderungen

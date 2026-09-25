@@ -5,6 +5,6 @@ export default defineConfig({
  base:'/kurzfilm-bewertung/',
  plugins:[react()],
  resolve:{alias:{'@':fileURLToPath(new URL('.',import.meta.url))}},
- build:{outDir:'dist',emptyOutDir:true},
+ build:{outDir:'docs',emptyOutDir:true},
  server:{host:'127.0.0.1',port:5173,strictPort:true,watch:{usePolling:true}},
 });
