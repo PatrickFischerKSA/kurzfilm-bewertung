@@ -23,3 +23,8 @@ assert.equal((await set(token,'storyboard','missing')).status,200);
 assert.equal((await call(token,{action:'field',film:'room',key:'rounding',value:'0.5',version:0})).status,200);
 assert.equal((await call(token,{action:'field',film:'room',key:'rounding',value:'0.2',version:1})).status,400);
 console.log('PASS: room isolation, authorization, validation, idempotency, parallel subject saves, same-field conflict, reset and settings.');
+const preflight=await fetch(base+'/api/rooms',{method:'OPTIONS',headers:{Origin:'https://patrickfischerksa.github.io','Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'authorization,content-type'}});
+assert.equal(preflight.status,204);assert.equal(preflight.headers.get('Access-Control-Allow-Origin'),'https://patrickfischerksa.github.io');
+const forbidden=await fetch(base+'/api/rooms',{headers:{Origin:'https://untrusted.example'}});assert.equal(forbidden.status,403);assert.equal(forbidden.headers.get('Access-Control-Allow-Origin'),null);
+const oversized=await fetch(base+'/api/rooms',{method:'POST',body:'x'.repeat(25000)});assert.equal(oversized.status,413);
+console.log('PASS: GitHub-origin CORS, rejected foreign origin, bounded request size.');
