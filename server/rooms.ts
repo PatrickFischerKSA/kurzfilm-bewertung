@@ -1,6 +1,5 @@
 import {database} from '@/lib/database';
 import {validField} from '@/lib/model';
-export const dynamic='force-dynamic';
 const headers={'Cache-Control':'no-store','Referrer-Policy':'no-referrer'};
 const json=(data:unknown,status=200)=>Response.json(data,{status,headers});
 async function hash(s:string) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s))),b=>b.toString(16).padStart(2,'0')).join(''); }
@@ -12,7 +11,6 @@ async function auth(request:Request) {
 }
 async function safe(request:Request,handler:()=>Promise<Response>) {
  try {
-  if(request.method!=='GET'&&request.headers.get('Origin')&&request.headers.get('Origin')!==new URL(request.url).origin)return json({error:'Zugriff nicht erlaubt.'},403);
   if(Number(request.headers.get('Content-Length')||0)>24000)return json({error:'Eingabe zu gross.'},413);
   return await handler();
  }catch(error){ console.error('Room request failed',error instanceof Error?error.message:'Unknown');return json({error:'Speichern oder Laden derzeit nicht möglich. Bitte erneut versuchen.'},503); }
@@ -24,7 +22,9 @@ export async function GET(request:Request) { return safe(request,async()=>{
  return json({name:room.name,films:films.results,fields:(fields.results as Record<string,unknown>[]).map(f=>({...f,value:JSON.parse(f.value as string)}))});
  }); }
 export async function POST(request:Request) {return safe(request,async()=>{
- const raw=await request.text();if(raw.length>24000)return json({error:'Eingabe zu gross.'},413);
+ const body=request.body?.getReader();let bytes=0;const chunks:Uint8Array[]=[];
+ if(body){while(true){const part=await body.read();if(part.done)break;bytes+=part.value.byteLength;if(bytes>24000){await body.cancel();return json({error:'Eingabe zu gross.'},413);}chunks.push(part.value);}}
+ const joined=new Uint8Array(bytes);let offset=0;for(const chunk of chunks){joined.set(chunk,offset);offset+=chunk.length;}const raw=new TextDecoder().decode(joined);
  let p;try{p=JSON.parse(raw);}catch{return json({error:'Ungültige Eingabe.'},400);}
  const db=database();const now=new Date().toISOString();
  if(p.action==='create') {

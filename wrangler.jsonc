@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kurzfilm-bewertung-api",
+  "main": "server/index.ts",
+  "account_id": "22a2c05c1bf9bca855767eb6dad549c2",
+  "compatibility_date": "2026-09-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "observability": { "enabled": true, "head_sampling_rate": 0.1 },
+  "vars": { "ALLOWED_ORIGINS": "https://patrickfischerksa.github.io" },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "kurzfilm-bewertung",
+    "database_id": "c9b03f81-a1c0-4933-85dc-9602e0a59d6c",
+    "migrations_dir": "drizzle"
+  }]
+}
