@@ -15,24 +15,28 @@ type ApiData = Room & {error:string;token:string;id:string;field:Field};
 type Pending={film:string;key:string;value:Field['value'];version:number;conflict?:Field|null};
 function Choice({value,onChange,label,items}:{value:string;onChange:(v:string)=>void;label:string;items:[string,string][]}) {return <Select value={value} onValueChange={onChange}><SelectTrigger aria-label={label}><SelectValue/></SelectTrigger><SelectContent>{items.map(([v,l])=><SelectItem key={v} value={v}>{l}</SelectItem>)}</SelectContent></Select>;}
 function Draft({value,onCommit,label,multiline=false,placeholder='',maxLength=4000}:{value:string;onCommit:(v:string)=>void;label:string;multiline?:boolean;placeholder?:string;maxLength?:number}) {
- const [draft,setDraft]=useState(value);const focused=useRef(false);const dirty=useRef(false);
- useEffect(()=>{if(!focused.current&&!dirty.current)setDraft(value)},[value]);
- const props={value:draft,'aria-label':label,placeholder,maxLength,onFocus:()=>{focused.current=true},onChange:(e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>)=>{dirty.current=true;setDraft(e.target.value)},onBlur:()=>{focused.current=false;if(dirty.current){onCommit(draft);dirty.current=false}else setDraft(value)}};
+ const props={
+  value,'aria-label':label,placeholder,maxLength,
+  onChange:(e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>)=>onCommit(e.target.value),
+ };
  return multiline?<textarea {...props} rows={2}/>:<input {...props}/>;
 }
 export default function Page(){
  const [token,setToken]=useState('');const [ready,setReady]=useState(false);const [room,setRoom]=useState<Room>(empty);const current=useRef<Room>(empty);
  const [film,setFilm]=useState('');const [tab,setTab]=useState('de');const [error,setError]=useState('');const [status,setStatus]=useState('');const [busy,setBusy]=useState(false);
  const [name,setName]=useState('');const [join,setJoin]=useState('');const [newTitle,setNewTitle]=useState('');const [showNew,setShowNew]=useState(false);const [share,setShare]=useState(false);const [notice,setNotice]=useState('');
- const pending=useRef(new Map<string,Pending>());const saving=useRef(false);const [pendingView,setPendingView]=useState<Pending[]>([]);const tokenRef=useRef('');const newFilmId=useRef('');
+ const pending=useRef(new Map<string,Pending>());const saving=useRef(false);const saveTimer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);const writeGeneration=useRef(0);const [pendingView,setPendingView]=useState<Pending[]>([]);const tokenRef=useRef('');const newFilmId=useRef('');
  const updateRoom=(r:Room)=>{current.current=r;setRoom(r)};
  const refreshPending=()=>setPendingView([...pending.current.values()]);
  const api=useCallback(async(body?:unknown)=>{const r=await fetch(API_URL,{method:body?'POST':'GET',headers:{'Content-Type':'application/json',Authorization:`Bearer ${tokenRef.current}`},body:body?JSON.stringify(body):undefined});const data=await r.json() as ApiData;if(!r.ok&&r.status!==409)throw new Error(data.error||'Verbindung unterbrochen.');return {data,conflict:r.status===409};},[]);
- const load=useCallback(async(force=false)=>{if(!force&&document.activeElement?.matches('input,textarea'))return;const {data}=await api();if(!force&&document.activeElement?.matches('input,textarea'))return;updateRoom(data);setFilm(f=>f||data.films[0]?.id||'');setStatus('Aktuell');setError('');},[api]);
+ const load=useCallback(async(force=false)=>{const generation=writeGeneration.current;const {data}=await api();if(!force&&(generation!==writeGeneration.current||saving.current))return;updateRoom(data);setFilm(f=>f||data.films[0]?.id||'');setStatus(pending.current.size?'Eingaben noch offen':'Aktuell');setError('');},[api]);
  const flush=useCallback(async()=>{
-  if(saving.current)return;saving.current=true;
-  try{for(const [id,p] of pending.current){if(p.conflict!==undefined)continue;setStatus('Speichert …');const {data,conflict}=await api({action:'field',...p});
-   if(conflict){p.conflict=data.field;refreshPending();continue;}
+  if(saving.current)return;saving.current=true;writeGeneration.current++;
+  try{while(true){
+   const entry=[...pending.current].find(([,edit])=>edit.conflict===undefined);
+   if(!entry)break;
+   const [id,p]=entry;setStatus('Speichert …');const {data,conflict}=await api({action:'field',...p});
+   if(conflict){const latest=pending.current.get(id);if(latest)latest.conflict=data.field??null;refreshPending();continue;}
    const latest=pending.current.get(id);const r=current.current;
    updateRoom({...r,fields:[...r.fields.filter(f=>fieldId(f.film_id,f.key)!==id),data.field]});
    if(latest===p)pending.current.delete(id);else if(latest)latest.version=data.field.version;
@@ -41,8 +45,8 @@ export default function Page(){
  },[api]);
  useEffect(()=>{const t=location.hash.slice(1);if(/^[0-9a-f-]{36}\.[0-9a-f]{64}$/.test(t)){tokenRef.current=t;setToken(t)}setReady(true);},[]);
  useEffect(()=>{if(!token)return;void load().catch(e=>setError(e.message));const timer=setInterval(()=>{if(!saving.current)void load().then(()=>flush()).catch(e=>{setError(e.message);setStatus('Verbindung unterbrochen')})},4000);return()=>clearInterval(timer)},[token,load,flush]);
- useEffect(()=>{const prevent=(e:BeforeUnloadEvent)=>{if(pending.current.size||document.activeElement?.matches('input,textarea')){e.preventDefault();e.returnValue=''}};window.addEventListener('beforeunload',prevent);return()=>window.removeEventListener('beforeunload',prevent)},[]);
- const set=(key:string,value:Field['value'],target=film)=>{const id=fieldId(target,key);const old=pending.current.get(id);const server=current.current.fields.find(f=>fieldId(f.film_id,f.key)===id);pending.current.set(id,{film:target,key,value,version:old?.version??server?.version??0,...(old?.conflict!==undefined?{conflict:old.conflict}:{})});refreshPending();void flush();};
+ useEffect(()=>{const prevent=(e:BeforeUnloadEvent)=>{if(pending.current.size){e.preventDefault();e.returnValue=''}};window.addEventListener('beforeunload',prevent);return()=>window.removeEventListener('beforeunload',prevent)},[]);
+ const set=(key:string,value:Field['value'],target=film)=>{const id=fieldId(target,key);const old=pending.current.get(id);const server=current.current.fields.find(f=>fieldId(f.film_id,f.key)===id);pending.current.set(id,{film:target,key,value,version:old?.version??server?.version??0,...(old?.conflict!==undefined?{conflict:old.conflict}:{})});refreshPending();clearTimeout(saveTimer.current);saveTimer.current=setTimeout(()=>void flush(),250);};
  // Null means explicitly unassessed and must override a previously saved score.
  const read=(key:string,target=film)=>{const p=pending.current.get(fieldId(target,key));return p?p.value:valueOf(room,target,key)};
  const rounding=String(read('rounding','room')||'0.1');const stats=(s:Subject)=>summary(k=>read(k),s,rounding);
