@@ -1,0 +1,2 @@
+export const MAX_VIDEO_BYTES = 90_000_000;
+export const MAX_LIBRARY_BYTES = 8_000_000_000;

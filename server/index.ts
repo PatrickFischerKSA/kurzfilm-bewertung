@@ -1,3 +1,4 @@
+import {videos} from './videos';
 import {GET,POST} from './rooms';
 export default {
  async fetch(request:Request,env:Env):Promise<Response>{
@@ -9,6 +10,13 @@ export default {
   if(origin)cors['Access-Control-Allow-Origin']=origin;
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{...cors,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Max-Age':'600'}});
   if(url.pathname==='/health')return Response.json({status:'ok',storage:'independent-d1'},{headers:cors});
+  if(url.pathname==='/api/videos'){
+   let response:Response;
+   try{response=await videos(request,url,env)}catch{response=Response.json({error:'Video derzeit nicht verfügbar.'},{status:503})}
+   const result=new Response(response.body,response);
+   for(const [key,value] of Object.entries(cors))result.headers.set(key,value);
+   return result;
+  }
   if(url.pathname!=='/api/rooms')return Response.json({error:'Nicht gefunden.'},{status:404,headers:cors});
   const response=request.method==='GET'?await GET(request):request.method==='POST'?await POST(request):Response.json({error:'Methode nicht erlaubt.'},{status:405});
   const result=new Response(response.body,response);for(const [key,value]of Object.entries(cors))result.headers.set(key,value);return result;

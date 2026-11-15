@@ -8,6 +8,7 @@
   "workers_dev": true,
   "observability": { "enabled": true, "head_sampling_rate": 0.1 },
   "vars": { "ALLOWED_ORIGINS": "https://patrickfischerksa.github.io" },
+  "r2_buckets": [{"binding":"VIDEOS","bucket_name":"kurzfilm-bewertung-videos"}],
   "d1_databases": [{
     "binding": "DB",
     "database_name": "kurzfilm-bewertung",

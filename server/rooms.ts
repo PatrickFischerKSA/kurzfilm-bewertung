@@ -3,7 +3,7 @@ import {validField} from '@/lib/model';
 const headers={'Cache-Control':'no-store','Referrer-Policy':'no-referrer'};
 const json=(data:unknown,status=200)=>Response.json(data,{status,headers});
 async function hash(s:string) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s))),b=>b.toString(16).padStart(2,'0')).join(''); }
-async function auth(request:Request) {
+export async function auth(request:Request) {
  const token=request.headers.get('Authorization')?.replace(/^Bearer /,'')||'';
  const [id,secret]=token.split('.');
  if(!/^[0-9a-f-]{36}$/.test(id||'')||!/^[0-9a-f]{64}$/.test(secret||''))return null;
