@@ -1,5 +1,5 @@
 import {auth} from './rooms';
-import {MAX_LIBRARY_BYTES, MAX_VIDEO_BYTES} from '@/lib/video-limits';
+import {MAX_LIBRARY_BYTES, MAX_VIDEO_BYTES, VIDEO_PART_BYTES} from '@/lib/video-limits';
 
 type VideoEnv = Env & { VIDEOS?: R2Bucket };
 type Video = {object_id:string; bytes:number; secret_hash:string};
@@ -56,24 +56,53 @@ export async function videos(request:Request,url:URL,env:VideoEnv) {
   return Response.json({url:url.toString()});
  }
  if(request.method!=='POST')return error('Methode nicht erlaubt.',405);
- const size=Number(request.headers.get('Content-Length'));
- if(!request.body||request.headers.get('Content-Type')!=='video/mp4')return error('Bitte eine MP4-Datei auswählen.',415);
- if(!Number.isSafeInteger(size)||size<12||size>MAX_VIDEO_BYTES)return error('Die MP4-Datei darf höchstens 90 MB gross sein.',413);
- const objectId=crypto.randomUUID();
- // A single D1 statement reserves space even when uploads start concurrently.
- const reserved=await env.DB.prepare('INSERT OR IGNORE INTO film_videos (film_id,object_id,bytes) SELECT ?,?,? WHERE (SELECT COALESCE(SUM(bytes),0) FROM film_videos)+?<=?').bind(id,objectId,size,size,MAX_LIBRARY_BYTES).run();
- if(!reserved.meta.changes)return error('Für diesen Film gibt es bereits ein Video oder der Videospeicher ist voll.',409);
- try{
-  const fixed=new FixedLengthStream(size);
-  await Promise.all([
-   request.body.pipeTo(fixed.writable),
-   bucket.put(objectId,fixed.readable,{httpMetadata:{contentType:'video/mp4'}}),
-  ]);
-  await env.DB.prepare('UPDATE film_videos SET ready=1 WHERE object_id=?').bind(objectId).run();
- }catch{
-  await bucket.delete(objectId);
-  await env.DB.prepare('DELETE FROM film_videos WHERE object_id=?').bind(objectId).run();
-  return error('Upload fehlgeschlagen. Bitte erneut versuchen.',503);
+ const action=url.searchParams.get('action');
+ const db=env.DB;
+ if(action==='start'){
+  const size=Number(url.searchParams.get('size'));
+  if(!Number.isSafeInteger(size)||size<12||size>MAX_VIDEO_BYTES)
+   return error('Die MP4-Datei darf höchstens 600 MB gross sein.',413);
+  const objectId=crypto.randomUUID();
+  const upload=await bucket.createMultipartUpload(objectId,{httpMetadata:{contentType:'video/mp4'}});
+  const reserved=await db.prepare('INSERT OR IGNORE INTO film_videos (film_id,object_id,bytes,upload_id) SELECT ?,?,?,? WHERE (SELECT COALESCE(SUM(bytes),0) FROM film_videos)+?<=?')
+   .bind(id,objectId,size,upload.uploadId,size,MAX_LIBRARY_BYTES).run();
+  if(!reserved.meta.changes){
+   await upload.abort();
+   return error('Ein Video oder Upload existiert bereits oder das Speicherlimit von 8 GB ist erreicht.',409);
+  }
+  return Response.json({session:objectId},{status:201});
  }
- return Response.json({uploaded:true},{status:201});
+ const session=url.searchParams.get('session');
+ const row=await db.prepare('SELECT object_id,bytes,upload_id,ready FROM film_videos WHERE film_id=? AND object_id=?')
+  .bind(id,session).first<{object_id:string;bytes:number;upload_id:string|null;ready:number}>();
+ if(!row?.upload_id)return error('Upload nicht gefunden.',404);
+ if(row.ready)return action==='complete'?Response.json({uploaded:true}):error('Das Video ist bereits gespeichert.',409);
+ const upload=bucket.resumeMultipartUpload(row.object_id,row.upload_id);
+ if(action==='abort'){
+  if(await bucket.head(row.object_id))return error('Das Video wurde bereits hochgeladen.',409);
+  await upload.abort();
+  await db.prepare('DELETE FROM film_videos WHERE object_id=? AND ready=0').bind(row.object_id).run();
+  return Response.json({aborted:true});
+ }
+ const count=Math.ceil(row.bytes/VIDEO_PART_BYTES);
+ if(action==='part'){
+  const number=Number(url.searchParams.get('part'));
+  if(!Number.isInteger(number)||number<1||number>count)return error('Ungültiger Upload-Teil.',400);
+  const length=Math.min(VIDEO_PART_BYTES,row.bytes-(number-1)*VIDEO_PART_BYTES);
+  if(!request.body||Number(request.headers.get('Content-Length'))!==length)return error('Falsche Grösse des Upload-Teils.',400);
+  const stream=new FixedLengthStream(length);
+  const [,part]=await Promise.all([request.body.pipeTo(stream.writable),upload.uploadPart(number,stream.readable)]);
+  return Response.json(part);
+ }
+ if(action==='complete'){
+  if(Number(request.headers.get('Content-Length'))>12000)return error('Ungültige Teileliste.',400);
+  const parts=await request.json() as R2UploadedPart[];
+  if(!Array.isArray(parts)||parts.length!==count||parts.some((part,i)=>part?.partNumber!==i+1||typeof part.etag!=='string'||part.etag.length>100))
+   return error('Ungültige Teileliste.',400);
+  const object=await bucket.head(row.object_id)??await upload.complete(parts);
+  if(object.size!==row.bytes)return error('Dateigrösse stimmt nicht überein.',409);
+  await db.prepare('UPDATE film_videos SET ready=1 WHERE object_id=?').bind(row.object_id).run();
+  return Response.json({uploaded:true});
+ }
+ return error('Unbekannte Upload-Aktion.',400);
 }
