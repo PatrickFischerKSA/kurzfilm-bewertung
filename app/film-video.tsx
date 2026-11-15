@@ -74,6 +74,7 @@ export function FilmVideo({film,token}:{film:string;token:string}) {
  return <section aria-label="Filmvideo" className="film-video">
   {source ? <video aria-label="Film abspielen" controls playsInline preload="metadata" src={source} onError={()=>setError('Video kann nicht abgespielt werden. Bitte verwende MP4 mit H.264 und AAC.')}/> :
    loaded&&<label>Video hinzufügen (MP4, max. 600 MB)
+    <small className="video-format">Für Windows und Mac als H.264-Video mit AAC-Ton exportieren.</small>
     <input type="file" accept=".mp4,video/mp4" disabled={uploading} onChange={event=>{
      const file=event.currentTarget.files?.[0];
      event.currentTarget.value='';
