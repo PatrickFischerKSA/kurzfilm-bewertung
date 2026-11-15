@@ -64,7 +64,7 @@ export async function videos(request:Request,url:URL,env:VideoEnv) {
    return error('Die MP4-Datei darf höchstens 600 MB gross sein.',413);
   const objectId=crypto.randomUUID();
   const upload=await bucket.createMultipartUpload(objectId,{httpMetadata:{contentType:'video/mp4'}});
-  const reserved=await db.prepare('INSERT OR IGNORE INTO film_videos (film_id,object_id,bytes,upload_id) SELECT ?,?,?,? WHERE (SELECT COALESCE(SUM(bytes),0) FROM film_videos)+?<=?')
+  const reserved=await db.prepare('INSERT OR IGNORE INTO film_videos (film_id,object_id,bytes,upload_id) SELECT ?,?,?,? WHERE (SELECT COALESCE(SUM(bytes),0) FROM film_videos)+(SELECT COALESCE(SUM(bytes),0) FROM film_storyboards)+?<=?')
    .bind(id,objectId,size,upload.uploadId,size,MAX_LIBRARY_BYTES).run();
   if(!reserved.meta.changes){
    await upload.abort();

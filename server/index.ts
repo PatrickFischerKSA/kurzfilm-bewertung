@@ -1,3 +1,4 @@
+import {storyboards} from './storyboards';
 import {videos} from './videos';
 import {GET,POST} from './rooms';
 export default {
@@ -10,9 +11,9 @@ export default {
   if(origin)cors['Access-Control-Allow-Origin']=origin;
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{...cors,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Max-Age':'600'}});
   if(url.pathname==='/health')return Response.json({status:'ok',storage:'independent-d1'},{headers:cors});
-  if(url.pathname==='/api/videos'){
+  if(url.pathname==='/api/videos'||url.pathname==='/api/storyboards'){
    let response:Response;
-   try{response=await videos(request,url,env)}catch{response=Response.json({error:'Video derzeit nicht verfügbar.'},{status:503})}
+   try{response=await (url.pathname==='/api/videos'?videos:storyboards)(request,url,env)}catch{response=Response.json({error:'Datei derzeit nicht verfügbar.'},{status:503})}
    const result=new Response(response.body,response);
    for(const [key,value] of Object.entries(cors))result.headers.set(key,value);
    return result;
